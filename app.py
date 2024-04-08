@@ -1,4 +1,132 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
+from flask_sqlalchemy import SQLAlchemy
+from joblib import load
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)  # Add this line to enable CORS for your Flask app
+
+# Configure your database connection string
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:admin@localhost/ehospital'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize SQLAlchemy
+db = SQLAlchemy(app)
+
+# Define your patient model
+class Patient(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    gender = db.Column(db.String(10))
+    age = db.Column(db.Integer)
+    hypertension = db.Column(db.Boolean)
+    heart_disease = db.Column(db.Boolean)
+    ever_married = db.Column(db.String(3))
+    work_type = db.Column(db.String(20))
+    Residence_type = db.Column(db.String(10))
+    avg_glucose_level = db.Column(db.Float)
+    bmi = db.Column(db.Float)
+    smoking_status = db.Column(db.String(15))
+    stroke = db.Column(db.Boolean)
+
+# Load the trained ML model
+with open('stroke.pkl', 'rb') as model_file:
+    model = load(model_file)
+
+
+@app.route('/')
+def landing_page():
+    return 'Backend is running'
+
+
+@app.route('/insert_patient', methods=['POST'])
+def insert_patient():
+    # Get data from request
+    data = request.json
+
+    # Extract values from data
+    id = data.get('id')
+    gender = data.get('gender')
+    age = data.get('age')
+    hypertension = data.get('hypertension')
+    heart_disease = data.get('heart_disease')
+    ever_married = data.get('ever_married')
+    work_type = data.get('work_type')
+    Residence_type = data.get('Residence_type')
+    avg_glucose_level = data.get('avg_glucose_level')
+    bmi = data.get('bmi')
+    smoking_status = data.get('smoking_status')
+    stroke = data.get('stroke')
+
+    # Create a new patient instance
+    new_patient = Patient(
+        id=id,
+        gender=gender,
+        age=age,
+        hypertension=hypertension,
+        heart_disease=heart_disease,
+        ever_married=ever_married,
+        work_type=work_type,
+        Residence_type=Residence_type,
+        avg_glucose_level=avg_glucose_level,
+        bmi=bmi,
+        smoking_status=smoking_status,
+        stroke=stroke
+    )
+
+    # Add the new patient to the database session and commit
+    db.session.add(new_patient)
+    db.session.commit()
+
+    return jsonify({'message': 'Patient data inserted successfully'}), 201
+
+
+@app.route('/predict_stroke', methods=['POST'])
+def predict_stroke():
+    # Get data from request
+    data = request.json
+
+    # Extract values from data
+    id = data.get('id')
+
+    # Retrieve patient information from the database
+    patient = Patient.query.filter_by(id=id).first()
+
+    if not patient:
+        return jsonify({'error': 'Patient not found'}), 404
+
+    # Prepare input features for prediction
+    features = [
+        1 if patient.gender == 'Female' else 0,
+        1 if patient.gender == 'Male' else 0,
+        1 if patient.gender == 'Other' else 0,
+        1 if patient.smoking_status == 'formerly smoked' else 0,
+        1 if patient.smoking_status == 'never smoked' else 0,
+        1 if patient.smoking_status == 'smokes' else 0,
+        1 if patient.smoking_status == 'Unknown' else 0,
+        1 if patient.work_type == 'children' else 0,
+        1 if patient.work_type == 'Govt_job' else 0,
+        1 if patient.work_type == 'Never_worked' else 0,
+        1 if patient.work_type == 'Private' else 0,
+        1 if patient.work_type == 'Self-employed' else 0,
+        patient.age,
+        1 if patient.hypertension else 0,
+        1 if patient.heart_disease else 0,
+        1 if patient.ever_married == 'Yes' else 0,
+        1 if patient.Residence_type == 'Urban' else 0,
+        patient.avg_glucose_level,
+        patient.bmi
+    ]
+
+    # Make prediction using the ML model
+    prediction = model.predict([features])[0]
+
+    return jsonify({'stroke_prediction': bool(prediction)})
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+""" from flask import Flask, request, jsonify
 import mysql.connector
 from joblib import load
 from flask_cors import CORS
@@ -103,3 +231,4 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 
+ """
