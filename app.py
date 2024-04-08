@@ -63,9 +63,12 @@ def insert_patient():
 
 @app.route('/predict_stroke', methods=['POST'])
 def predict_stroke():
+
     # Get data from request
     data = request.json
-    
+    # Load the trained ML model
+    with open('stroke.pkl', 'rb') as model_file:
+        model = load(model_file)
     # Extract values from data
     id = data.get('id')
     
