@@ -7,18 +7,21 @@ app = Flask(__name__)
 CORS(app)# Add this line to enable CORS for your Flask app
 
 # Connect to MySQL database
-'''db = mysql.connector.connect(
+db = mysql.connector.connect(
     host="127.0.0.1",
     port="3306",
     user="root",
     password="admin",
     database="ehospital"
-)'''
+)
 
 # Load the trained ML model
 with open('stroke.pkl', 'rb') as model_file:
     model = load(model_file)
 
+@app.route('/')
+def landing_page():
+    return 'Backend is running'
 
 @app.route('/insert_patient', methods=['POST'])
 def insert_patient():
