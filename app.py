@@ -1,10 +1,10 @@
 from flask import Flask, request, jsonify
 import mysql.connector
-#from joblib import load
+import joblib
 from flask_cors import CORS
-from sklearn.externals import joblib
+#from sklearn.externals import joblib
 
-model = joblib.load('stroke.pkl')
+
 app = Flask(__name__)
 CORS(app)# Add this line to enable CORS for your Flask app
 
@@ -27,7 +27,8 @@ db = mysql.connector.connect(
 
 # Load the trained ML model
 with open('stroke.pkl', 'rb') as model_file:
-    model = load(model_file)
+    model = joblib.load(model_file)
+    #model = joblib.load('stroke.pkl')
 
 @app.route('/')
 def landing_page():
