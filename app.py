@@ -9,7 +9,6 @@ CORS(app)# Add this line to enable CORS for your Flask app
 # Connect to MySQL database
 db = mysql.connector.connect(
     host="us-cluster-east-01.k8s.cleardb.net",
-    port="3306",
     user="b2a95cc800eb0c",
     password="ab9a770b",
     database="heroku_dabded5d9a5f04a"
