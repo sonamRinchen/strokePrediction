@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
 import mysql.connector
-from joblib import load
+#from joblib import load
 from flask_cors import CORS
+from sklearn.externals import joblib
 
+model = joblib.load('stroke.pkl')
 app = Flask(__name__)
 CORS(app)# Add this line to enable CORS for your Flask app
 
@@ -24,8 +26,8 @@ db = mysql.connector.connect(
 ) """
 
 # Load the trained ML model
-#with open('stroke.pkl', 'rb') as model_file:
-    #model = load(model_file)
+with open('stroke.pkl', 'rb') as model_file:
+    model = load(model_file)
 
 @app.route('/')
 def landing_page():
@@ -68,8 +70,8 @@ def predict_stroke():
     data = request.json
     
     # Load the trained ML model
-    with open('stroke.pkl', 'rb') as model_file:
-        model = load(model_file)
+    #with open('stroke.pkl', 'rb') as model_file:
+        #model = load(model_file)
 
     # Extract values from data
     id = data.get('id')
