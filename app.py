@@ -24,8 +24,8 @@ db = mysql.connector.connect(
 ) """
 
 # Load the trained ML model
-with open('stroke.pkl', 'rb') as model_file:
-    model = load(model_file)
+#with open('stroke.pkl', 'rb') as model_file:
+    #model = load(model_file)
 
 @app.route('/')
 def landing_page():
@@ -66,9 +66,11 @@ def predict_stroke():
 
     # Get data from request
     data = request.json
+    
     # Load the trained ML model
     with open('stroke.pkl', 'rb') as model_file:
         model = load(model_file)
+
     # Extract values from data
     id = data.get('id')
     
