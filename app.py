@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 import mysql.connector
-import pickle
 from joblib import load
 from flask_cors import CORS
 
@@ -99,8 +98,5 @@ def predict_stroke():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
 
 
